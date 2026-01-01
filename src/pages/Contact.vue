@@ -1,7 +1,11 @@
 <template>
   <v-container class="d-flex flex-column ga-4">
     <h1 class="text-primary">Get Involved</h1>
-    <v-form @submit.prevent>
+    <form
+      method="POST"
+      netlify
+      @submit.prevent
+    >
       <v-text-field
         v-model="email"
         color="primary"
@@ -9,7 +13,7 @@
         required
         :rules="[
           (v: string) => !!v || 'Email is required',
-          (v: string) => /.+@.+\..+/.test(v) || 'E-mail must be valid',
+          (v: string) => /.+@.+\..+/.test(v) || 'Email must be valid',
         ]"
         variant="outlined"
       />
@@ -47,17 +51,12 @@
         label="Subscribe to our newsletter"
       />
 
-      <!-- <v-btn
-            color="primary"
-            text="Submit"
-            type="submit"
-          /> -->
-
       <v-btn
         color="primary"
         text="Submit"
+        type="submit"
       />
-    </v-form>
+    </form>
   </v-container>
 </template>
 
