@@ -66,6 +66,19 @@
         type="submit"
       />
     </form>
+
+    <v-dialog v-model="dialog" max-width="500">
+      <v-card>
+        <v-card-title class="text-h5">Thank You!</v-card-title>
+        <v-card-text>
+          Your message has been sent. We will get back to you shortly.
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="primary" text @click="dialog = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -77,6 +90,8 @@
   const lastName = ref('')
   const message = ref('')
   const subscribe = ref(false)
+
+  const dialog = ref(false)
 
   async function onSubmit () {
     const body = new URLSearchParams({
