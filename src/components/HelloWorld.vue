@@ -16,6 +16,7 @@
       <v-row>
         <v-col v-for="link in links" :key="link.route" cols="12">
           <v-card
+            append-icon="mdi-chevron-right"
             class="py-4"
             color="surface-variant"
             :prepend-icon="link.icon"
