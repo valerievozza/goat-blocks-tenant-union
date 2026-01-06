@@ -2,7 +2,7 @@
   <v-container class="d-flex flex-column ga-2">
     <h1 class="text-primary">Events</h1>
 
-    <v-sheet>
+    <v-card>
       <div class="d-flex justify-space-between pa-2">
         <v-btn
           class="ma-2"
@@ -10,7 +10,7 @@
           variant="text"
           @click="prev()"
         />
-        <p class="text-h3">{{ title }}</p>
+        <p class="text-h3">{{ month }}</p>
         <v-btn
           class="ma-2"
           icon="mdi-chevron-right"
@@ -25,52 +25,50 @@
         class="mb-4"
         color="primary"
         :events="events"
+        @click:event="onEventClick"
       />
-    </v-sheet>
+    </v-card>
 
     <p
-      v-if="!focusedMonthEvents.length"
+      v-if="focusedMonthEvents.length === 0"
       class="text-center text-body-1 mt-2"
     >
-      No events scheduled for {{ title }}
+      No events scheduled for {{ month }}
     </p>
 
-    <v-card v-for="event in focusedMonthEvents" :key="event.key">
-      <v-card-title class="text-primary">{{ event.name }}</v-card-title>
-      <v-card-subtitle>
-        <p><span class="font-weight-medium">Date:</span> {{ event.date }}</p>
-        <p><span class="font-weight-medium">Time:</span> {{ event.time }}</p>
-      </v-card-subtitle>
-      <v-card-text>
-        <p><span class="font-weight-medium">Location:</span> {{ event.location }}</p>
-      </v-card-text>
-    </v-card>
+    <EventCard
+      v-for="event in focusedMonthEvents"
+      :key="event.key"
+      :event="event"
+    />
+
+    <v-dialog v-model="show" max-width="400px">
+      <EventCard
+        v-if="selectedEvent"
+        :event="selectedEvent"
+      />
+    </v-dialog>
   </v-container>
 </template>
 
 <script setup lang="ts">
-  import { ref, computed } from 'vue'
+  import type { EventItem } from '@/types/EventItem'
+  import { computed, ref } from 'vue'
+  import EventCard from '@/components/EventCard.vue'
 
   const calendar = ref<any>(null)
   const focus = ref('') // '' = today
-  const title = computed(() => calendar.value?.title ?? '')
+  const month = computed(() => calendar.value?.title ?? '')
 
-  function prev() {
+  const show = ref(false)
+  const selectedEvent = ref<EventItem | null>(null)
+
+  function prev () {
     calendar.value?.prev?.()
   }
 
-  function next() {
+  function next () {
     calendar.value?.next?.()
-  }
-
-  type EventItem = {
-    key: number
-    name: string
-    start: string
-    end: string
-    date: string
-    time: string
-    location: string
   }
 
   const events = ref<EventItem[]>([
@@ -94,15 +92,25 @@
     },
   ])
 
-  function monthKey(d: Date) {
+  function onEventClick (native: Event, cal: any) {
+    const clicked = cal?.event ?? cal
+
+    const found = events.value.find(e => String(e.key) === String(clicked?.id ?? clicked?.key))
+      ?? events.value.find(e => e.name === (clicked?.name ?? clicked?.title) && e.start === clicked?.start)
+      ?? null
+
+    selectedEvent.value = found
+    show.value = !!found
+
+    native?.stopPropagation?.()
+  }
+
+  function monthKey (d: Date) {
     return `${d.getFullYear()}-${d.getMonth()}`
   }
 
   const focusedMonthEvents = computed(() => {
-    const focusDate = focus.value
-      ? new Date(`${focus.value}T00:00:00`) // force local
-      : new Date()
-
+    const focusDate = focus.value ? new Date(`${focus.value}T00:00:00`) : new Date()
     const key = monthKey(focusDate)
 
     return events.value
